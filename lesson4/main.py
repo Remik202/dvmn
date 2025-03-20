@@ -8,7 +8,7 @@ red_croped = red.crop((50, 0, red.width, red.height))
 red_croped2 = red.crop((25, 0, red.width - 25, red.height))
 red_image = Image.blend(red_croped, red_croped2, 0.5)
 
-blue_croped = blue.crop((50, 0, blue.width, blue.height))
+blue_croped = blue.crop((0, 0, blue.width - 50, blue.height))
 blue_croped2 = blue.crop((25, 0, blue.width - 25, blue.height))
 blue_image = Image.blend(blue_croped, blue_croped2, 0.5)
 
