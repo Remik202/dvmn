@@ -5,28 +5,44 @@ import os
 
 SKILLS_FILE = 'skills.txt'
 LETTERS_MAPPING = {
-    "Стремительный прыжок": "С͒т͒р̋͠е͠м͒͠ит͒е͠л̋͠ь̋н͒ы̋͠й͒͠ п̋͠р̋͠ы̋͠ж͒о̋к̋̋",
-    "Электрический выстрел": "Э͒͠л̋͠е͠к̋̋т͒р̋͠ич̋͠е͠с͒к̋̋ий͒͠ в͒͠ы̋͠с͒т͒р̋͠е͠л̋͠",
-    "Ледяной удар": "Л̋͠е͠д̋я̋н͒о̋й͒͠ у͒͠д̋а͠р̋͠",
-    "Стремительный удар": "С͒т͒р̋͠е͠м͒͠ит͒е͠л̋͠ь̋н͒ы̋͠й͒͠ у͒͠д̋а͠р̋͠",
-    "Кислотный взгляд": "К̋̋ис͒л̋͠о̋т͒н͒ы̋͠й͒͠ в͒͠з̋̋г͒͠л̋͠я̋д̋",
-    "Тайный побег": "Т͒а͠й͒͠н͒ы̋͠й͒͠ п̋͠о̋б̋е͠г͒͠",
-    "Ледяной выстрел": "Л̋͠е͠д̋я̋н͒о̋й͒͠ в͒͠ы̋͠с͒т͒р̋͠е͠л̋͠",
-    "Огненный заряд": "О̋г͒͠н͒е͠н͒н͒ы̋͠й͒͠ з̋̋а͠р̋͠я̋д̋"
+    'а': 'а͠', 'б': 'б̋', 'в': 'в͒͠',
+    'г': 'г͒͠', 'д': 'д̋', 'е': 'е͠',
+    'ё': 'ё͒͠', 'ж': 'ж͒', 'з': 'з̋̋͠',
+    'и': 'и', 'й': 'й͒͠', 'к': 'к̋̋',
+    'л': 'л̋͠', 'м': 'м͒͠', 'н': 'н͒',
+    'о': 'о̋', 'п': 'п̋͠', 'р': 'р̋͠',
+    'с': 'с͒', 'т': 'т͒', 'у': 'у͒͠',
+    'ф': 'ф̋̋͠', 'х': 'х͒͠', 'ц': 'ц̋',
+    'ч': 'ч̋͠', 'ш': 'ш͒͠', 'щ': 'щ̋',
+    'ъ': 'ъ̋͠', 'ы': 'ы̋͠', 'ь': 'ь̋',
+    'э': 'э͒͠͠', 'ю': 'ю̋͠', 'я': 'я̋',
+    'А': 'А͠', 'Б': 'Б̋', 'В': 'В͒͠',
+    'Г': 'Г͒͠', 'Д': 'Д̋', 'Е': 'Е',
+    'Ё': 'Ё͒͠', 'Ж': 'Ж͒', 'З': 'З̋̋͠',
+    'И': 'И', 'Й': 'Й͒͠', 'К': 'К̋̋',
+    'Л': 'Л̋͠', 'М': 'М͒͠', 'Н': 'Н͒',
+    'О': 'О̋', 'П': 'П̋͠', 'Р': 'Р̋͠',
+    'С': 'С͒', 'Т': 'Т͒', 'У': 'У͒͠',
+    'Ф': 'Ф̋̋͠', 'Х': 'Х͒͠', 'Ц': 'Ц̋',
+    'Ч': 'Ч̋͠', 'Ш': 'Ш͒͠', 'Щ': 'Щ̋',
+    'Ъ': 'Ъ̋͠', 'Ы': 'Ы̋͠', 'Ь': 'Ь̋',
+    'Э': 'Э͒͠͠', 'Ю': 'Ю̋͠', 'Я': 'Я̋',
+    ' ': ' '
 }
 
-fake = Faker("ru_RU")
+def convert_to_runic(skill):
+    return ''.join(LETTERS_MAPPING.get(char, char) for char in skill)
 
 def load_skills():
     with open(SKILLS_FILE, 'r', encoding='utf8') as file:
-        return [skill.strip() for skill in file.readlines()]
+        return [skill.strip() for skill in file]
 
-def create_files(num_files, skills):
+def create_files(num_files, skills, fake):
     os.makedirs("result", exist_ok=True)
 
     for _ in range(num_files):
         selected_skills = random.sample(skills, 3)
-        runic_skills = [LETTERS_MAPPING.get(skill, skill) for skill in selected_skills]
+        runic_skills = [convert_to_runic(skill) for skill in selected_skills]
         
         context = {
             "first_name": fake.first_name(),
@@ -45,30 +61,18 @@ def create_files(num_files, skills):
 
         base_name = "result/form_"
         counter = 1
-
-        while True:
-            output_file_path = f"{base_name}{counter}.svg"
-            if not os.path.exists(output_file_path):
-                break
+        while os.path.exists(f"{base_name}{counter}.svg"):
             counter += 1
+        output_file_path = f"{base_name}{counter}.svg"
 
         file_operations.render_template("src/template.svg", output_file_path, context)
         print(f"Файл создан: {output_file_path}")
 
 def main():
-    skills = load_skills()  
+    fake = Faker("ru_RU")
+    skills = load_skills()
 
-    while True:
-        try:
-            user_input = input("Сколько файлов вы хотите создать? ")
-            num_files = int(user_input)
-            if num_files <= 0:
-                print("Пожалуйста, введите положительное число.")
-                continue
-            create_files(num_files, skills) 
-            break
-        except ValueError:
-            print("Неверные данные. Пожалуйста, введите целое положительное число.")
+    create_files(10, skills, fake)
 
 if __name__ == "__main__":
     main()
