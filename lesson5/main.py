@@ -85,7 +85,7 @@ def load_skills():
 def create_files(num_files, skills, fake):
     os.makedirs("result", exist_ok=True)
 
-    for _ in range(num_files):
+    for i in range(num_files):
         selected_skills = random.sample(skills, 3)
         runic_skills = [convert_to_runic(skill) for skill in selected_skills]
 
@@ -105,20 +105,17 @@ def create_files(num_files, skills, fake):
         }
 
         base_name = "result/form_"
-        counter = 1
-        while os.path.exists(f"{base_name}{counter}.svg"):
-            counter += 1
-
-        output_file_path = f"{base_name}{counter}.svg"
+        for counter in range(1, 100):
+            output_file_path = f"{base_name}{counter}.svg"
+            if not os.path.exists(output_file_path):
+                break
 
         file_operations.render_template("src/template.svg", output_file_path, context)
-        print(f"Файл создан: {output_file_path}")
 
 def main():
     fake = Faker("ru_RU")
     skills = load_skills()
-
     create_files(10, skills, fake)
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
