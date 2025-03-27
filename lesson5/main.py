@@ -1,11 +1,22 @@
-import file_operations
 from faker import Faker
 import random
 import os
 
-skills_files = 'skills.txt'
 
-letters_mapping = {
+FAKE = Faker("ru_RU")
+
+SKILLS = [
+    "Стремительный прыжок",
+    "Электрический выстрел",
+    "Ледяной удар",
+    "Стремительный удар",
+    "Кислотный взгляд",
+    "Тайный побег",
+    "Ледяной выстрел",
+    "Огненный заряд",
+]
+
+LETTERS = {
     'а': 'а͠',
     'б': 'б̋',
     'в': 'в͒͠', 
@@ -75,25 +86,40 @@ letters_mapping = {
     ' ': ' '
 }
 
-def convert_to_runic(skill):
-    return ''.join(letters_mapping.get(char, char) for char in skill)
 
-def load_skills():
-    with open(skills_files, 'r', encoding='utf8') as file:
-        return [skill.strip() for skill in file]
+def read_file(filename):
+    with open(filename, encoding="utf8") as file_:
+        return file_.read()
 
-def create_files(num_files, skills, fake):
+
+def write_to_file(filename, content):
+    with open(filename, "w", encoding="utf8") as file_:
+        return file_.write(content)
+
+
+def render_template(template_path, output_path, context):
+    content = read_file(template_path)
+
+    for key, value in context.items():
+        content = content.replace("{%s}" % key, str(value))
+
+    write_to_file(output_path, content)
+
+
+def main():
     os.makedirs("result", exist_ok=True)
-
-    for i in range(num_files):
-        selected_skills = random.sample(skills, 3)
-        runic_skills = [convert_to_runic(skill) for skill in selected_skills]
-
+    for i in range(1, 11):
+        sampled_skills = random.sample(SKILLS, 3)
+        runic_skills = []
+        for skill in sampled_skills:
+            for letter in skill:
+                skill = skill.replace(letter, LETTERS[letter])
+            runic_skills.append(skill)
         context = {
-            "first_name": fake.first_name(),
-            "last_name": fake.last_name(),
-            "job": fake.job(),
-            "town": fake.city(),
+            "first_name": FAKE.first_name_male(),
+            "last_name": FAKE.last_name_male(),
+            "job": FAKE.job(),
+            "town": FAKE.city(),
             "strength": random.randint(3, 18),
             "agility": random.randint(3, 18),
             "endurance": random.randint(3, 18),
@@ -101,21 +127,12 @@ def create_files(num_files, skills, fake):
             "luck": random.randint(3, 18),
             "skill_1": runic_skills[0],
             "skill_2": runic_skills[1],
-            "skill_3": runic_skills[2]
+            "skill_3": runic_skills[2],
         }
+        render_template(
+            "src/template.svg", "result/form_{}.svg".format(i), context
+        )
 
-        base_name = "result/form_"
-        for counter in range(1, 100):
-            output_file_path = f"{base_name}{counter}.svg"
-            if not os.path.exists(output_file_path):
-                break
 
-        file_operations.render_template("src/template.svg", output_file_path, context)
-
-def main():
-    fake = Faker("ru_RU")
-    skills = load_skills()
-    create_files(10, skills, fake)
-
-if __name__ == "__main__": 
+if __name__ == "__main__":
     main()
